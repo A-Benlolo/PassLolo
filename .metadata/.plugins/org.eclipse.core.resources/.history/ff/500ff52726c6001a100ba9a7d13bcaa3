@@ -1,0 +1,67 @@
+package window;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+public class About {
+	public static void display() {
+		// The variables for readability
+		int row, col;
+		int width, height;
+		double weightX=0, weightY=0;
+		int anchor=GridBagConstraints.LINE_END, fill=GridBagConstraints.NONE;
+		Insets insets = new Insets(5, 5, 5, -15);
+		int ipadx = 0, ipady = 0;
+		
+		// Create the panel
+		GridBagLayout layout = new GridBagLayout();
+		JPanel panel = new JPanel(layout);
+		
+		// Create the message at the top
+		JLabel prompt = new JLabel();
+		prompt.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panel.add(prompt);
+		
+		// Add the vault label for author
+		row = 0; col = 0; width = 1; height = 1;
+		anchor=GridBagConstraints.LINE_END;
+		insets = new Insets(5, 5, 5, 5);
+		GridBagConstraints authorLabelConstraints1 = new GridBagConstraints(col, row, width, height, weightX, weightY, anchor, fill, insets, ipadx, ipady);
+		JLabel authorLabel1 = new JLabel("Author:");
+		panel.add(authorLabel1, authorLabelConstraints1);
+		
+		// Add the vault label for software
+		row = 1; col = 0; width = 1; height = 1;
+		anchor=GridBagConstraints.LINE_END;
+		insets = new Insets(5, 5, 5, 5);
+		GridBagConstraints softwareLabelConstraints1 = new GridBagConstraints(col, row, width, height, weightX, weightY, anchor, fill, insets, ipadx, ipady);
+		JLabel softwareLabel1 = new JLabel("Software:");
+		panel.add(softwareLabel1, softwareLabelConstraints1);
+		
+		// Add the vault label for version
+		row = 2; col = 0; width = 1; height = 1;
+		anchor=GridBagConstraints.LINE_END;
+		insets = new Insets(5, 5, 5, 5);
+		GridBagConstraints versionLabelConstraints1 = new GridBagConstraints(col, row, width, height, weightX, weightY, anchor, fill, insets, ipadx, ipady);
+		JLabel versionLabel1 = new JLabel("Version:");
+		panel.add(versionLabel1, versionLabelConstraints1);
+		
+		// Add the vault label for version
+		row = 0; col = 0; width = 1; height = 1;
+		anchor=GridBagConstraints.LINE_START;
+		insets = new Insets(5, 5, 5, 5);
+		GridBagConstraints authorLabelConstraints2 = new GridBagConstraints(col, row, width, height, weightX, weightY, anchor, fill, insets, ipadx, ipady);
+		JLabel authorLabel2 = new JLabel("Alex Benlolo");
+		panel.add(authorLabel2, authorLabelConstraints2);
+
+		// Display the window
+		JOptionPane.showConfirmDialog(null, panel, "About PassLolo - Password Manager", JOptionPane.OK_OPTION, JOptionPane.PLAIN_MESSAGE);
+	}
+}

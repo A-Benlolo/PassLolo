@@ -1,0 +1,68 @@
+package crypto;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.util.concurrent.TimeUnit;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
+public class PBKDF2 {
+	private static final int ITERATIONS = 16348;
+	private static final int KEY_LENGTH = 256;
+	
+	/**
+	 * Hash a password using PBKDF2 with Hmac SHA1.
+	 * 
+	 * @param password The password to hash.
+	 * @param salt The salt to use.
+	 * @return The salted, hashed key.
+	 * @throws Exception You will probably never see this.
+	 */
+	public static byte[] generateKey(char[] password, byte[] salt) {
+		// Wait for one second before generating the key
+		try {
+			TimeUnit.MILLISECONDS.wait(333);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		// Create the key specifications
+		PBEKeySpec spec = new PBEKeySpec(password, salt, ITERATIONS, KEY_LENGTH);
+		
+		// Get the instance for the key factory
+		SecretKeyFactory skf = null;
+		try {
+			skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		
+		// Generate the key
+		byte[] key = null;
+		try {
+			key = skf.generateSecret(spec).getEncoded();
+		} catch (InvalidKeySpecException e) {
+			e.printStackTrace();
+		}
+		
+		// Clear the password
+		spec.clearPassword();
+		
+		// Return the key
+		return key;
+	}
+
+	/**
+	 * Generate 16 random bytes securely for use in salting.
+	 * 
+	 * @return The salt.
+	 */
+	public static byte[] getSalt() {
+		SecureRandom rand = new SecureRandom();
+		byte[] salt = new byte[16];
+		rand.nextBytes(salt);
+		return salt;
+	}
+}

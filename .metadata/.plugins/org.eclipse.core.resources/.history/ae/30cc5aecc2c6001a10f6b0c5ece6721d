@@ -1,0 +1,27 @@
+package utilities;
+
+import java.awt.Component;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+
+public class TitledSeparator extends JSeparator {
+	private static final long serialVersionUID = 3872961630745676506L;
+	
+	private int width;
+	private JPanel panel;
+	private JLabel label;
+	
+	public TitledSeparator(String text, int textWidth, int fullWidth) {
+		panel = new JPanel();
+		panel.setLayout(null);
+		label = new JLabel(text);
+	}
+	
+	public JPanel get() {
+		panel.add(label)
+		label.setBounds(0, 0, );
+	}
+
+}

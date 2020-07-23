@@ -1,0 +1,26 @@
+package crypto;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
+public class PBKDF2 {
+	private static final int ITERATIONS = 16348;
+	private static final int KEY_LENGTH = 256;
+	
+	public static byte[] generateKey(char[] password, byte[] salt) throws Exception {
+		// Create the key specifications
+		PBEKeySpec spec = new PBEKeySpec(password, salt, ITERATIONS, KEY_LENGTH);
+		
+		// Get the instance for the key factory
+		SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+		
+		// Generate the key
+		byte[] key = skf.generateSecret(spec).getEncoded();
+		
+		// Clear the password
+		spec.clearPassword();
+		
+		// Return the key
+		return key;
+	}
+}

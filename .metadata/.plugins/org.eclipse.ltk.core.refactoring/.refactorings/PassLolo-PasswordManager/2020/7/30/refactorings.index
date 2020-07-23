@@ -1,0 +1,14 @@
+1595126730701	Delete element
+1595181572207	Rename field 'oldLabel'
+1595181577368	Rename field 'oldField'
+1595181582103	Rename field 'oldReveal'
+1595182352278	Rename method 'recursizeRemoveSelectionByEscape'
+1595184480424	Rename field 'confirm'
+1595185032594	Rename local variable 'currPasswordChars'
+1595185038116	Rename local variable 'currPassword'
+1595185044640	Rename local variable 'currHashBytes'
+1595185049163	Rename local variable 'currHash'
+1595185052184	Rename local variable 'eneteredHash'
+1595188156538	Rename local variable 'i'
+1595188160557	Rename local variable 'i'
+1595195938120	Delete element

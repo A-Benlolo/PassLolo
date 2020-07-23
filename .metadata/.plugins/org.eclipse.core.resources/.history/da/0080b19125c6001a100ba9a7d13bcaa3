@@ -1,0 +1,59 @@
+package window;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+public class About {
+	public static void display() {
+		// The variables for readability
+		int row, col;
+		int width, height;
+		double weightX=0, weightY=0;
+		int anchor=GridBagConstraints.LINE_END, fill=GridBagConstraints.NONE;
+		Insets insets = new Insets(5, 5, 5, -15);
+		int ipadx = 0, ipady = 0;
+		
+		// Create the panel
+		GridBagLayout layout = new GridBagLayout();
+		JPanel panel = new JPanel(layout);
+		
+		// Create the message at the top
+		JLabel prompt = new JLabel();
+		prompt.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panel.add(prompt);
+		
+		// Add the vault label for author
+		row = 0; col = 0; width = 1; height = 1;
+		anchor=GridBagConstraints.LINE_END;
+		insets = new Insets(5, 5, 5, 5);
+		GridBagConstraints authorLabelConstraints1 = new GridBagConstraints(col, row, width, height, weightX, weightY, anchor, fill, insets, ipadx, ipady);
+		JLabel authorLabel1 = new JLabel(String.format("%8s: %35s", "Author", "Alex Benlolo"));
+		panel.add(authorLabel1, authorLabelConstraints1);
+		
+		// Add the vault label for software
+		row = 1; col = 0; width = 1; height = 1;
+		anchor=GridBagConstraints.LINE_END;
+		insets = new Insets(5, 5, 5, 5);
+		GridBagConstraints softwareLabelConstraints = new GridBagConstraints(col, row, width, height, weightX, weightY, anchor, fill, insets, ipadx, ipady);
+		JLabel softwareLabel = new JLabel(String.format("%8s: %35s", "Software", "PassLolo - Password Manager"));
+		panel.add(softwareLabel, softwareLabelConstraints);
+		
+		// Add the vault label for version
+		row = 2; col = 0; width = 1; height = 1;
+		anchor=GridBagConstraints.LINE_END;
+		insets = new Insets(5, 5, 5, 5);
+		GridBagConstraints versionLabelConstraints = new GridBagConstraints(col, row, width, height, weightX, weightY, anchor, fill, insets, ipadx, ipady);
+		JLabel versionLabel = new JLabel(String.format("%8s: %35s", "Version", "2.0.0.0"));
+		panel.add(versionLabel, versionLabelConstraints);
+
+		// Display the window
+		JOptionPane.showConfirmDialog(null, panel, "About PassLolo - Password Manager", JOptionPane.OK_OPTION, JOptionPane.PLAIN_MESSAGE);
+	}
+}

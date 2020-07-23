@@ -1,0 +1,9 @@
+package utilities;
+
+import java.awt.Component;
+
+import javax.swing.JSeparator;
+
+public class TitledSeparator extends JSeparator {
+
+}

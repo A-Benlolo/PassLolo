@@ -1,0 +1,377 @@
+package window;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Base64;
+
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JSpinner;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.MatteBorder;
+import javax.swing.border.TitledBorder;
+
+import crypto.AES;
+import crypto.Password;
+import loloTable.TableEntry;
+
+public class Settings {
+	// Sizes
+	private static final int WINDOW_WIDTH = 450;
+	private static final int WINDOW_HEIGHT = 300;
+	private static final Dimension SEPARATOR_DIMENSIONS = new Dimension(300, 1);
+	
+	// The editors
+	private static JCheckBox clearClipboardCheckBox; 
+	private static JSpinner clearClipboardDelaySpinner;
+	private static JCheckBox autoGeneratePasswordCheckBox; 
+	private static JCheckBox autoCheckDictionaryCheckBox; 
+	private static JCheckBox rememberLastOpenedVaultCheckBox; 
+	private static JCheckBox showEntriesOnTreeCheckBox; 
+	private static JCheckBox onlySearchVisibleFieldsCheckBox; 
+	
+	// The labels
+	private static JLabel clearClipboardLabel;
+	private static JLabel clearClipboardDelayLabel;
+	private static JLabel autoGeneratePasswordLabel;
+	private static JLabel autoCheckDictionaryLabel;
+	private static JLabel rememberLastOpenedVaultLabel;
+	private static JLabel showEntriesOnTreeLabel;
+	private static JLabel onlySearchVisibleFieldsLabel;
+	
+	// The sections
+	private static JLabel clipboardSection;
+	private static JLabel entryCreationSection;
+	private static JLabel personalizationSection;
+	private static JLabel categoryTreeSection;
+	private static JLabel searchSection;
+	
+	// The trackers
+	private static boolean userIsDone = false;
+	
+	public static Object[] display(Object... settings) {
+		// Reset the trackers
+		userIsDone = false;
+		
+		// The variables for readability
+		int row = 0;
+
+		// The panel that contains the message
+		GridBagLayout layout = new GridBagLayout();
+		JPanel panel = new JPanel(layout);
+		panel.setBackground(Color.WHITE);
+		JScrollPane scrollPane = new JScrollPane(panel);
+
+		// Add the section for clipboard
+		clipboardSection = new JLabel();
+		addSeparator(panel, clipboardSection, "Clipboard", row++);
+		// Add the clear clipboard setting
+		clearClipboardLabel = new JLabel();
+		clearClipboardCheckBox = new JCheckBox();
+		addSettingsLine(panel, row++, clearClipboardLabel, clearClipboardCheckBox, "Start timer to clear clipboard after copying (recommended)", settings[0]);
+		// Add the delay for clipboard clearing settings
+		clearClipboardDelayLabel = new JLabel();
+		clearClipboardDelaySpinner = new JSpinner();
+		addSettingsLine(panel, row++, clearClipboardDelayLabel, clearClipboardDelaySpinner, "Delay before clearing clipboard", settings[1]);
+		
+		// Add the section for entry creation
+		entryCreationSection = new JLabel();
+		addSeparator(panel, entryCreationSection, "Entry Creation", row++);
+		// Add the auto generate password setting
+		autoGeneratePasswordLabel = new JLabel();
+		autoGeneratePasswordCheckBox = new JCheckBox();
+		addSettingsLine(panel, row++, autoGeneratePasswordLabel, autoGeneratePasswordCheckBox, "Automatically generate password on changed settings", settings[2]);
+		// Add the auto check dictionary setting
+		autoCheckDictionaryLabel = new JLabel();
+		autoCheckDictionaryCheckBox = new JCheckBox();
+		addSettingsLine(panel, row++, autoCheckDictionaryLabel, autoCheckDictionaryCheckBox, "Check dictionary on submission", settings[3]);
+		
+		// Add the section for personalization
+		personalizationSection = new JLabel();
+		addSeparator(panel, personalizationSection, "Personalization", row++);
+		// Add the remember last opened vault setting
+		rememberLastOpenedVaultLabel = new JLabel();
+		rememberLastOpenedVaultCheckBox = new JCheckBox();
+		addSettingsLine(panel, row++, rememberLastOpenedVaultLabel, rememberLastOpenedVaultCheckBox, "Remember last opened vault", settings[4]);
+		
+		// Add the category tree section
+		categoryTreeSection = new JLabel();
+		addSeparator(panel, categoryTreeSection, "Category Tree", row++);
+		// Add the show entries on tree setting
+		showEntriesOnTreeLabel = new JLabel();
+		showEntriesOnTreeCheckBox = new JCheckBox();
+		addSettingsLine(panel, row++, showEntriesOnTreeLabel, showEntriesOnTreeCheckBox, "Show entries on category tree", settings[5]);
+		
+		// Add the search section
+		searchSection = new JLabel();
+		addSeparator(panel, searchSection, "Search", row++);
+		// Add the search only visible fields setting
+		onlySearchVisibleFieldsLabel = new JLabel();
+		onlySearchVisibleFieldsCheckBox = new JCheckBox();
+		addSettingsLine(panel, row++, onlySearchVisibleFieldsLabel, onlySearchVisibleFieldsCheckBox, "Include only visible fields in search", settings[6]);
+		
+		// Create the option pane and dialog
+		JOptionPane pane = new JOptionPane(scrollPane, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[] {"Apply", "Cancel"}, null);
+		JDialog dialog = new JDialog(new JFrame(), "Settings", true);
+		dialog.setIconImage(new ImageIcon("..\\resources\\windowIcon.png").getImage());
+		dialog.setContentPane(pane);
+		dialog.setBounds(800, 400, WINDOW_WIDTH, WINDOW_HEIGHT);
+		dialog.setResizable(false);		
+
+		// Add the closing listeners
+//		pane.addPropertyChangeListener(buttonPressed(dialog));
+//		dialog.addWindowListener(windowClosing(dialog));
+		
+		// Remove the ability to focus
+		//recursiveUnfocus(dialog);
+		
+		// Add the listener to submit when enter is pressed in the correct field
+		recursizeShortcutKeys(dialog, pane, dialog);
+		
+		dialog.setVisible(true);
+		
+		return null;
+	}
+	
+	/**
+	 * Add a line to the settings for a setting
+	 * 
+	 * @param panel The panel to add to.
+	 * @param row The row on the panel.
+	 * @param label The label describing the settings.
+	 * @param editor The components that changes the setting.
+	 * @param text The text for the label.
+	 * @param value The value for the editor.
+	 */
+	private static void addSettingsLine(JPanel panel, int row, JLabel label, Component editor, String text, Object value) {
+		Insets insets = new Insets(5, 5, 5, -228);
+		
+		// Add the label
+		GridBagConstraints labelConstraints = new GridBagConstraints(0, row, 2, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets, 0, 0);
+		label = new JLabel(text);
+		panel.add(label, labelConstraints);
+		
+		// Create the editor constraints
+		insets = new Insets(5, -228, 5, 5);
+		GridBagConstraints editorConstraints = new GridBagConstraints(2, row, 1, 1, 0, 0, GridBagConstraints.LINE_END, GridBagConstraints.NONE, insets, 0, 0);
+		
+		// Add the editor as a check box
+		if(editor instanceof JCheckBox) {
+			JCheckBox checkBox = (JCheckBox)editor;
+			checkBox.setBackground(Color.WHITE);
+			checkBox.setSelected((Boolean)value);
+			panel.add(checkBox, editorConstraints);
+		}
+		
+		// Add the editor as a spinner
+		if(editor instanceof JSpinner) {
+			JSpinner spinner = (JSpinner)editor;
+			spinner.setBackground(Color.WHITE);
+			spinner.setValue(value);
+			panel.add(spinner, editorConstraints);
+		}
+	}
+	
+	/**
+	 * Add a section header.
+	 * 
+	 * @param panel The panel to add the header too.
+	 * @param section The label for the section.
+	 * @param text The name of the section.
+	 * @param row The row the section appears on.
+	 */
+	private static void addSeparator(JPanel panel, JLabel section, String text, int row) {
+		Insets insets = new Insets(0, 5, 0, 5);
+		
+		// Add the section
+		GridBagConstraints sectionConstraints = new GridBagConstraints(0, row, 1, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets, 0, 0);
+		section = new JLabel(text);
+		section.setForeground(new Color(64, 64, 64));	
+		panel.add(section, sectionConstraints);
+		
+		// Add the clipboard separator
+		GridBagConstraints separatorConstraints = new GridBagConstraints(1, row, 2, 1, 0, 0, GridBagConstraints.LINE_START, GridBagConstraints.NONE, insets, 0, 0);
+		JSeparator separator = new JSeparator();
+		separator.setPreferredSize(SEPARATOR_DIMENSIONS);
+		separator.getInsets(insets);
+		panel.add(separator, separatorConstraints);
+	}
+
+	/**
+	 * Apply shortcut keys to the dialog
+	 * 
+	 * @param root The root pane for all components.
+	 * @param pane The option pane.
+	 * @param dialog The window.
+	 */
+	private static void recursizeShortcutKeys(Component root, JOptionPane pane, JDialog dialog) {
+		root.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				// Apply the accept action
+				if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+					pane.setValue(pane.getOptions()[0]);
+				}
+				// Apply the cancel action
+				else if (e.getKeyChar() == KeyEvent.VK_ESCAPE) {
+					dialog.setVisible(false);
+					userIsDone = true;
+				}
+			}
+		});
+		
+		// Do the recursion
+		if (root instanceof Container) {
+			Component[] children = ((Container) root).getComponents();
+			for (Component child : children)
+				recursizeShortcutKeys(child, pane, dialog);
+		}
+	}
+	
+	/**
+	 * Create a table entry with the entered information.
+	 * 
+	 * @param dialog The dialog.
+	 * @param hashedKey The key used to encrypt the password.
+	 * 
+	 * @return A PropertyChangeListener.
+	 */
+	private static PropertyChangeListener buttonPressed(JDialog dialog, byte[] hashedKey) {
+		return new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent pce) {
+				// The user clicked accept
+				if(pce.getNewValue() != null && pce.getNewValue().equals("Accept")) {
+					// Ensure the password fields match
+					char[] password1 = passwordField.getPassword();
+					char[] password2 = confirmPasswordField.getPassword();
+					boolean equal = password1.length == password2.length;
+					int confirm = 0;
+					
+					// Make sure the lengths are equal and the characters match
+					if(equal)
+						for(int i = 0; i < password1.length; i++)
+							if(password1[i] != password2[i])
+								equal = false;
+					
+					// If something didn't match, tell the user
+					if(!equal) {
+						JOptionPane.showMessageDialog(null, "The password fields do not match.", "Entry Creation Error", JOptionPane.ERROR_MESSAGE);
+						dialog.setVisible(false);
+						userIsDone = false;
+						return;
+					}
+					
+					// Make sure the password field is not empty
+					if(password1.length == 0) {
+						JOptionPane.showMessageDialog(null, "Password field cannot be empty.", "Empty Password Field", JOptionPane.ERROR_MESSAGE);
+						userIsDone = false;
+						dialog.setVisible(false);
+						return;
+					}
+					
+					// Check to make sure the password is strong
+					if(strengthBar.getValue() != 100 && password1.length != 0) {
+						confirm = JOptionPane.showConfirmDialog(null, "Password strength is not at 100%. Are you sure you want to continue?", "Weak Password Warning", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, new ImageIcon("..\\resources\\searchResults.png"));
+						if(confirm == JOptionPane.NO_OPTION) {
+							dialog.setVisible(false);
+							return;
+						}
+					}
+					
+					// Get all of the fields
+					String category = (String)categoryComboBox.getSelectedItem();
+					String title = titleField.getText();
+					String username = usernameField.getText();
+					String notes = notesField.getText();
+					char[] passwordChars = passwordField.getPassword();
+					String password = new String(passwordChars);
+					
+					// Change category to an empty string if null
+					category = (category == null)? "" : category;
+
+					// Check the dictionary for the password
+					String result = "";
+					if(autoCheckDictionaryGlobal) {
+						result = Password.checkDictionary(password);
+						// Warn the user.
+						if(result != null && passwordChars.length != 0) {
+							// Of an exact match
+							if(result.toLowerCase().equals(password))
+								confirm = JOptionPane.showConfirmDialog(null, "An exact match of this password was found in a dictionary. Are you sure you want to continue?", "Weak Password Warning", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, new ImageIcon("..\\resources\\searchResults.png"));
+							// Of a similar match
+							else
+								confirm = JOptionPane.showConfirmDialog(null, "A similar match of this password was found in a dictionary: \""+result+".\" Are you sure you want to continue?", "Weak Password Warning", JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, new ImageIcon("..\\resources\\searchResults.png"));
+	
+							if(confirm == JOptionPane.NO_OPTION) {
+								dialog.setVisible(false);
+								return;
+							}
+						}
+					}
+					
+					// Encrypt and encode the password, then create the entry
+					try {
+						password = new String(Base64.getEncoder().encode(AES.encrypt(password.getBytes(), hashedKey)));
+						createdEntry = new TableEntry(category, title, username, password, notes);
+					} catch (Exception e) {
+						createdEntry = null;
+						e.printStackTrace();
+					}
+					
+					// Wipe the sensitive data
+					result = null;
+					password = null;
+					for(int i = 0; i < passwordChars.length; i++)
+						passwordChars[i] = '\0';
+					for(int i = 0; i < password1.length; i++)
+						password1[i] = '\0';
+					for(int i = 0; i < password2.length; i++)
+						password2[i] = '\0';
+					
+					// Set the user as done
+					userIsDone = true;
+				}
+				// The user wants to cancel
+				else if(pce.getNewValue() != null && pce.getNewValue().equals("Cancel"))
+					userIsDone = true;
+				dialog.setVisible(false);
+			}
+		};
+	}
+
+	/**
+	 * Close the dialog.
+	 * 
+	 * @param dialog The dialog.
+	 * 
+	 * @return A WindowAdapter.
+	 */
+	public static WindowAdapter windowClosing(JDialog dialog) {
+		return new WindowAdapter() {
+			public void windowClosing(WindowEvent we) {
+				userIsDone = true;
+				createdEntry = null;
+				dialog.setVisible(false);
+			}
+		};
+	}
+}
